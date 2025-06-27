@@ -1,27 +1,24 @@
 import pytest
-from ichatbio.types import ArtifactMessage, ProcessMessage
+from ichatbio.agent_response import TextResponse, ProcessBeginResponse, ProcessLogResponse, ArtifactResponse
 
-from src.agent import CataasAgent, GetCatImageParameters
+from src.agent import HelloWorldAgent
 
 
 @pytest.mark.asyncio
-async def test_cataas():
-    agent = CataasAgent()
-    response = agent.run("I need a Sphynx", "get_cat_image", GetCatImageParameters())
-    messages = [m async for m in response]
+async def test_hello_world(context, messages):
+    # The test `context` populates the `messages` list with the agent's responses
+    await HelloWorldAgent().run(context, "Hi", "hello", None)
 
-    process_summaries = [p.summary for p in messages if type(p) is ProcessMessage and p.summary]
+    # Message objects are restricted to the following types:
+    messages: list[TextResponse | ProcessBeginResponse | ProcessLogResponse | ArtifactResponse]
 
-    assert process_summaries == [
-        "Searching for cats",
-        "Retrieving cat",
-        "Cat retrieved"
+    # We can test all the agent's responses at once
+    assert messages == [
+        ProcessBeginResponse("Thinking"),
+        ProcessLogResponse("Hello world!"),
+        ArtifactResponse(mimetype="text/html",
+                         description="The Wikipedia page for \"Hello World\"",
+                         uris=["https://en.wikipedia.org/wiki/Hello_World"],
+                         metadata={'source': 'Wikipedia'}),
+        TextResponse("I said it!")
     ]
-
-    artifacts = [p for p in messages if type(p) is ArtifactMessage]
-    assert len(artifacts) == 1
-
-    artifact = artifacts[0]
-    assert artifact.mimetype == "image/png"
-    assert artifact.content
-    assert artifact.metadata == {"api_query_url": "https://cataas.com/cat/sphynx"}

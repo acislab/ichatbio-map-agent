@@ -1,6 +1,7 @@
-from agent import CataasAgent
 from ichatbio.server import run_agent_server
 
+from src.agent import HelloWorldAgent
+
 if __name__ == "__main__":
-    agent = CataasAgent()
+    agent = HelloWorldAgent()
     run_agent_server(agent, host="0.0.0.0", port=9999)
