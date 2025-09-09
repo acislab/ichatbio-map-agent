@@ -20,4 +20,10 @@ Run the server:
 uvicorn src.agent:create_app --factory --reload
 ```
 
+You can also run the agent server as a Docker container:
+
+```bash
+docker compose up
+```
+
 If everything worked, you should be able to find your agent card at http://localhost:9999/.well-known/agent.json.
