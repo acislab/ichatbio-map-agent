@@ -1,10 +1,11 @@
 from typing import override, Optional
 
-from pydantic import BaseModel
-
 from ichatbio.agent import IChatBioAgent
 from ichatbio.agent_response import ResponseContext, IChatBioAgentProcess
+from ichatbio.server import build_agent_app
 from ichatbio.types import AgentCard, AgentEntrypoint
+from pydantic import BaseModel
+from starlette.applications import Starlette
 
 
 class HelloWorldAgent(IChatBioAgent):
@@ -51,3 +52,9 @@ class HelloWorldAgent(IChatBioAgent):
 
         # Reply directly to the iChatBio agent, not the user
         await context.reply("I said it!")
+
+
+def create_app() -> Starlette:
+    agent = HelloWorldAgent()
+    app = build_agent_app(agent)
+    return app

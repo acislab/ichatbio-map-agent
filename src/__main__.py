@@ -1,7 +1,7 @@
-from ichatbio.server import run_agent_server
+import uvicorn
 
-from src.agent import HelloWorldAgent
+import agent
 
 if __name__ == "__main__":
-    agent = HelloWorldAgent()
-    run_agent_server(agent, host="0.0.0.0", port=9999)
+    app = agent.create_app()
+    uvicorn.run(app, host="0.0.0.0", port=9999)

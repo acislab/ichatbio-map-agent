@@ -6,14 +6,18 @@ A template for making new iChatBio agents.
 
 *Requires python 3.10 or higher*
 
+Set up your development environment:
+
 ```bash
-# Setup
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install .
+```
 
-# Start up the agent web server
-python src
+Run the server:
+
+```bash
+uvicorn src.agent:create_app --factory --reload
 ```
 
 If everything worked, you should be able to find your agent card at http://localhost:9999/.well-known/agent.json.
