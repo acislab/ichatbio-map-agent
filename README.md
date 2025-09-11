@@ -9,7 +9,7 @@ A template for making new iChatBio agents.
 Set up your development environment:
 
 ```bash
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install .
 ```
