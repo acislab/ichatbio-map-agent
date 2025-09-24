@@ -17,7 +17,7 @@ pip install .
 Run the server:
 
 ```bash
-uvicorn --app-dir src agent:create_app --factory --reload
+uvicorn --app-dir src agent:create_app --factory --reload --host "0.0.0.0" --port 9999
 ```
 
 You can also run the agent server as a Docker container:
