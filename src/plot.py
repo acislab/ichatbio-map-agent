@@ -111,8 +111,7 @@ def read_path(content: JSON, path: list[str]) -> Iterator[float]:
             for record in records:
                 yield from read_path(record, path[1:])
         case dict() as record:
-            next_layer = record.get(path[1])
-            yield from read_path(next_layer, path[1:])
+            yield from read_path(layer, path[1:])
         case _ as property if len(path) == 1:
             try:
                 yield float(property)

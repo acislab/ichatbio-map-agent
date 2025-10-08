@@ -59,6 +59,26 @@ def test_extract_path_values():
     assert lons == [10.7, 5.5, 70.0]
 
 
+def test_read_complicated_path():
+    data = {
+        "items": [
+            {"indexTerms": {"geopoint": {"lat": 40.09325, "lon": -122.22687}}},
+            {"indexTerms": {"geopoint": {"lat": 0.9166666667, "lon": 19.1}}},
+        ]
+    }
+
+    paths = PropertyPaths(
+        latitude=["items", "indexTerms", "geopoint", "lat"],
+        longitude=["items", "indexTerms", "geopoint", "lon"],
+        style_by=None,
+    )
+
+    lats = list(read_path(data, paths.latitude))
+    lons = list(read_path(data, paths.longitude))
+
+    assert lats == [40.09325, 0.9166666667]
+
+
 def test_render_points_as_geojson():
     geo = render_points_as_geojson(list(zip([53.1, 3.3, 59.5], [10.7, 5.5, 70.0])))
 
