@@ -143,19 +143,19 @@ def test_render_points_as_geojson():
     assert geo == {
         "features": [
             {
-                "geometry": {"coordinates": [53.1, 10.7], "type": "Point"},
+                "geometry": {"coordinates": [10.7, 53.1], "type": "Point"},
                 "id": 0,
                 "properties": {},
                 "type": "Feature",
             },
             {
-                "geometry": {"coordinates": [3.3, 5.5], "type": "Point"},
+                "geometry": {"coordinates": [5.5, 3.3], "type": "Point"},
                 "id": 1,
                 "properties": {},
                 "type": "Feature",
             },
             {
-                "geometry": {"coordinates": [59.5, 70.0], "type": "Point"},
+                "geometry": {"coordinates": [70.0, 59.5], "type": "Point"},
                 "id": 2,
                 "properties": {},
                 "type": "Feature",
