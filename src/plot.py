@@ -1,9 +1,11 @@
-from typing import Optional, Self
+from typing import Optional, Self, Iterator
 
 import pydantic
 from instructor import from_openai, retry, AsyncInstructor
 from openai import AsyncOpenAI
 from pydantic import BaseModel
+
+from util import JSON
 
 Path = list[str]
 
@@ -99,3 +101,19 @@ async def select_properties(schema: dict):
         raise
 
     return generation.response
+
+
+def read_path(content: JSON, path: list[str]) -> Iterator[float]:
+    layer = content[path[0]]
+    match layer:
+        case list() as records:
+            for record in records:
+                yield from read_path(record, path[1:])
+        case dict() as record:
+            next_layer = record.get(path[1])
+            yield from read_path(next_layer, path[1:])
+        case _ as property if len(path) == 1:
+            try:
+                yield float(property)
+            except ValueError:
+                yield None

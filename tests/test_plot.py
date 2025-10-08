@@ -3,9 +3,9 @@ import json
 import pydantic
 import pytest
 
-import plot
 from conftest import resource
 from plot import make_validated_response_model, PropertyPaths
+from plot import read_path, select_properties
 from util import extract_json_schema
 
 
@@ -34,10 +34,27 @@ def test_model():
 async def test_choose_paths():
     content = resource("buried_list_of_lat_lons.json")
     schema = extract_json_schema(json.loads(content))
-    response = await plot.select_properties(schema)
+    paths = await select_properties(schema)
 
-    assert response == PropertyPaths(
+    assert paths == PropertyPaths(
         latitude=["points", "latitude"],
         longitude=["points", "longitude"],
         style_by=None,
     )
+
+
+@pytest.mark.asyncio
+async def test_extract_path_values():
+    data = json.loads(resource("buried_list_of_lat_lons.json"))
+
+    paths = PropertyPaths(
+        latitude=["points", "latitude"],
+        longitude=["points", "longitude"],
+        style_by=None,
+    )
+
+    lats = list(read_path(data, paths.latitude))
+    lons = list(read_path(data, paths.longitude))
+
+    assert lats == [53.1, 3.3, 59.5]
+    assert lons == [10.7, 5.5, 70.0]
