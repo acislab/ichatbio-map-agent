@@ -111,6 +111,25 @@ def test_read_complicated_path_with_string_values():
     assert lons == [-99.225, -99.2416667]
 
 
+def test_read_path_from_list_as_root():
+    data = [
+        {"dwc:decimalLatitude": "23.075", "dwc:decimalLongitude": "-99.225"},
+        {"dwc:decimalLatitude": "23.1083333", "dwc:decimalLongitude": "-99.2416667"},
+    ]
+
+    paths = PropertyPaths(
+        latitude=["dwc:decimalLatitude"],
+        longitude=["dwc:decimalLongitude"],
+        color_by=None,
+    )
+
+    lats = list(read_path(data, paths.latitude))
+    lons = list(read_path(data, paths.longitude))
+
+    assert lats == [23.075, 23.1083333]
+    assert lons == [-99.225, -99.2416667]
+
+
 def test_missing_properties():
     data = {
         "items": [

@@ -111,14 +111,14 @@ async def select_properties(request: str, schema: dict):
 
 
 def read_path(content: JSON, path: list[str]) -> Iterator[float]:
-    layer = content.get(path[0])
-    match layer:
+    match content:
         case list() as records:
             for record in records:
-                yield from read_path(record, path[1:])
+                yield from read_path(record, path)
         case dict() as record:
-            yield from read_path(record, path[1:])
-        case _ as scalar if len(path) == 1:
+            next_property = record.get(path[0])
+            yield from read_path(next_property, path[1:])
+        case _ as scalar if len(path) == 0:
             if scalar is None:
                 yield None
             else:
