@@ -130,7 +130,7 @@ def render_points_as_geojson(
 
     geo = geojson.FeatureCollection(
         [
-            geojson.Feature(id=i, geometry=geojson.Point((lat, lon)), properties=props)
+            geojson.Feature(id=i, geometry=geojson.Point((lon, lat)), properties=props)
             for i, ((lat, lon), props) in enumerate(zip(coordinates, properties))
             if lat is not None and lon is not None
         ]
