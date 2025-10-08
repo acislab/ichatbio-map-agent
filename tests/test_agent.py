@@ -1,25 +1,63 @@
+import ichatbio.types
 import pytest
-from ichatbio.agent_response import DirectResponse, ProcessBeginResponse, ProcessLogResponse, ArtifactResponse, \
-    ResponseMessage
+from ichatbio.agent_response import (
+    ArtifactResponse,
+    ProcessBeginResponse,
+    ProcessLogResponse,
+    ResponseMessage,
+)
 
+import agent
+from conftest import resource
 from src.agent import MapAgent
 
 
+@pytest.mark.httpx_mock(
+    should_mock=lambda request: request.url == "https://artifact.test"
+)
 @pytest.mark.asyncio
-async def test_hello_world(context, messages):
-    # The test `context` populates the `messages` list with the agent's responses
-    await MapAgent().run(context, "Hi", "hello", None)
+async def test_make_geojson(context, messages, httpx_mock):
+    content = resource("buried_list_of_lat_lons.json")
+    httpx_mock.add_response(url="https://artifact.test", text=content)
+
+    await MapAgent().run(
+        context,
+        "Do it",
+        "plot",
+        agent.Parameters(
+            artifact=ichatbio.types.Artifact(
+                local_id="#0000",
+                description="na",
+                mimetype="na",
+                uris=["https://artifact.test"],
+                metadata={},
+            )
+        ),
+    )
 
     # Message objects are restricted to the following types:
     messages: list[ResponseMessage]
 
     # We can test all the agent's responses at once
     assert messages == [
-        ProcessBeginResponse("Thinking"),
-        ProcessLogResponse("Hello world!"),
-        ArtifactResponse(mimetype="text/html",
-                         description="The Wikipedia page for \"Hello World\"",
-                         uris=["https://en.wikipedia.org/wiki/Hello_World"],
-                         metadata={'source': 'Wikipedia'}),
-        DirectResponse("I said it!")
+        ProcessBeginResponse(summary="Creating map data", data=None),
+        ProcessLogResponse(
+            text="Retrieving artifact #0000 content from https://artifact.test",
+            data=None,
+        ),
+        ProcessLogResponse(
+            text="Using the following property paths",
+            data={
+                "latitude": ["points", "latitude"],
+                "longitude": ["points", "longitude"],
+                "style_by": None,
+            },
+        ),
+        ArtifactResponse(
+            mimetype="application/json",
+            description="GeoJSON points extracted from artifact #0000",
+            uris=None,
+            content=b'{"type": "FeatureCollection", "features": [{"type": "Feature", "id": 0, "geometry": {"type": "Point", "coordinates": [53.1, 53.1]}, "properties": {}}, {"type": "Feature", "id": 1, "geometry": {"type": "Point", "coordinates": [3.3, 3.3]}, "properties": {}}, {"type": "Feature", "id": 2, "geometry": {"type": "Point", "coordinates": [59.5, 59.5]}, "properties": {}}]}',
+            metadata={"format": "geojson"},
+        ),
     ]

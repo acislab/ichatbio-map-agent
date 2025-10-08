@@ -96,7 +96,7 @@ async def select_properties(schema: dict):
             temperature=0,
             response_model=model,
             messages=messages,
-            max_retries=1,
+            max_retries=5,
         )
     except retry.InstructorRetryException as e:
         raise
