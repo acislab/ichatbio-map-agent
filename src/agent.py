@@ -1,6 +1,7 @@
 import json
 from typing import override
 
+import dotenv
 from ichatbio.agent import IChatBioAgent
 from ichatbio.agent_response import ResponseContext, IChatBioAgentProcess
 from ichatbio.server import build_agent_app
@@ -37,8 +38,8 @@ class MapAgent(IChatBioAgent):
             entrypoints=[
                 AgentEntrypoint(
                     id="plot",
-                    description="Visualizes geographic data on interactive maps.",
-                    parameters=None,
+                    description="Generates GeoJSON data from JSON artifacts that contain geographic data.",
+                    parameters=Parameters,
                 )
             ],
         )
@@ -92,6 +93,7 @@ class MapAgent(IChatBioAgent):
 
 
 def create_app() -> Starlette:
+    dotenv.load_dotenv()
     agent = MapAgent()
     app = build_agent_app(agent)
     return app
