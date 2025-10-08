@@ -71,7 +71,7 @@ class MapAgent(IChatBioAgent):
                         },
                     )
                     latitudes = read_path(content, paths.latitude)
-                    longitudes = read_path(content, paths.latitude)
+                    longitudes = read_path(content, paths.longitude)
                     if paths.style_by:
                         properties = read_path(content, paths.style_by)
                     else:
