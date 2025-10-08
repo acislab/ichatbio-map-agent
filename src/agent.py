@@ -59,7 +59,7 @@ class MapAgent(IChatBioAgent):
             content = await retrieve_artifact_content(params.artifact, process)
             schema = extract_json_schema(content)
 
-            match await select_properties(schema):
+            match await select_properties(request, schema):
                 case PropertyPaths() as paths:
                     # TODO: do all of these at the same time to ensure alignment
                     await process.log(
@@ -67,18 +67,18 @@ class MapAgent(IChatBioAgent):
                         data={
                             "latitude": paths.latitude,
                             "longitude": paths.longitude,
-                            "style_by": paths.style_by,
+                            "color_by": paths.color_by,
                         },
                     )
                     latitudes = read_path(content, paths.latitude)
                     longitudes = read_path(content, paths.longitude)
-                    if paths.style_by:
-                        properties = read_path(content, paths.style_by)
+                    if paths.color_by:
+                        extra_values = read_path(content, paths.color_by)
                     else:
-                        properties = None
+                        extra_values = None
 
                     coords = list(zip(latitudes, longitudes))
-                    geo = render_points_as_geojson(coords, properties)
+                    geo = render_points_as_geojson(coords, extra_values)
 
                     await process.create_artifact(
                         mimetype="application/json",

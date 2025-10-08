@@ -22,7 +22,7 @@ async def test_make_geojson(context, messages, httpx_mock):
 
     await MapAgent().run(
         context,
-        "Do it",
+        "Get points colored by size",
         "plot",
         agent.Parameters(
             artifact=ichatbio.types.Artifact(
@@ -50,14 +50,14 @@ async def test_make_geojson(context, messages, httpx_mock):
             data={
                 "latitude": ["points", "latitude"],
                 "longitude": ["points", "longitude"],
-                "style_by": None,
+                "color_by": ["points", "size"],
             },
         ),
         ArtifactResponse(
             mimetype="application/json",
             description="GeoJSON points extracted from artifact #0000",
             uris=None,
-            content=b'{"type": "FeatureCollection", "features": [{"type": "Feature", "id": 0, "geometry": {"type": "Point", "coordinates": [53.1, 53.1]}, "properties": {}}, {"type": "Feature", "id": 1, "geometry": {"type": "Point", "coordinates": [3.3, 3.3]}, "properties": {}}, {"type": "Feature", "id": 2, "geometry": {"type": "Point", "coordinates": [59.5, 59.5]}, "properties": {}}]}',
+            content=b'{"type": "FeatureCollection", "features": [{"type": "Feature", "id": 0, "geometry": {"type": "Point", "coordinates": [10.7, 53.1]}, "properties": {"value": 1.0}}, {"type": "Feature", "id": 1, "geometry": {"type": "Point", "coordinates": [5.5, 3.3]}, "properties": {"value": 2.0}}, {"type": "Feature", "id": 2, "geometry": {"type": "Point", "coordinates": [70.0, 59.5]}, "properties": {"value": 3.0}}]}',
             metadata={"format": "geojson"},
         ),
     ]

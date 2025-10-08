@@ -1,10 +1,10 @@
 from typing import Optional, Self, Iterator
 
 import geojson
-import pydantic
 from instructor import from_openai, retry, AsyncInstructor
 from openai import AsyncOpenAI
 from pydantic import BaseModel
+from pydantic import Field, model_validator
 
 from util import JSON
 
@@ -18,7 +18,10 @@ class GiveUp(BaseModel):
 class PropertyPaths(BaseModel):
     latitude: Path
     longitude: Path
-    style_by: Optional[Path] = None
+    color_by: Optional[Path] = Field(
+        None,
+        description="The property to use to determine how the points will be colored on a map.",
+    )
 
 
 def trace_path_in_schema(schema: dict, target_path: list[str], index=0):
@@ -34,7 +37,9 @@ def trace_path_in_schema(schema: dict, target_path: list[str], index=0):
     return target_path[:index], schema
 
 
-def make_validated_response_model(schema: dict, allowed_types=("number", "string")):
+def make_validated_response_model(
+    schema: dict, allowed_types=("integer", "number", "string")
+):
     def validate_path(path: list[str]):
         trace, terminal_schema = trace_path_in_schema(schema, path)
 
@@ -55,14 +60,14 @@ def make_validated_response_model(schema: dict, allowed_types=("number", "string
     class ResponseModel(BaseModel):
         response: GiveUp | PropertyPaths
 
-        @pydantic.model_validator(mode="after")
+        @model_validator(mode="after")
         def validate(self) -> Self:
             match self.response:
                 case PropertyPaths() as paths:
                     validate_path(paths.latitude)
                     validate_path(paths.longitude)
-                    if paths.style_by:
-                        validate_path(paths.style_by)
+                    if paths.color_by:
+                        validate_path(paths.color_by)
             return self
 
     return ResponseModel
@@ -78,7 +83,7 @@ latitude: ["records", "data", "geo", "latitude"]
 """
 
 
-async def select_properties(schema: dict):
+async def select_properties(request: str, schema: dict):
     model = make_validated_response_model(schema)
 
     messages = [
@@ -87,6 +92,7 @@ async def select_properties(schema: dict):
             "role": "user",
             "content": f"Here is the schema of my data:\n\n{schema}",
         },
+        {"role": "user", "content": request},
     ]
 
     client: AsyncInstructor = from_openai(AsyncOpenAI())
@@ -123,15 +129,17 @@ def read_path(content: JSON, path: list[str]) -> Iterator[float]:
 
 
 def render_points_as_geojson(
-    coordinates: list[(float, float)], properties: list[dict] = None
+    coordinates: list[(float, float)], values: list[float | int | str] = None
 ) -> geojson.FeatureCollection:
-    if properties is None:
-        properties = ({} for _ in coordinates)
+    if values is None:
+        values = (1.0 for _ in coordinates)
 
     geo = geojson.FeatureCollection(
         [
-            geojson.Feature(id=i, geometry=geojson.Point((lon, lat)), properties=props)
-            for i, ((lat, lon), props) in enumerate(zip(coordinates, properties))
+            geojson.Feature(
+                id=i, geometry=geojson.Point((lon, lat)), properties={"value": value}
+            )
+            for i, ((lat, lon), value) in enumerate(zip(coordinates, values))
             if lat is not None and lon is not None
         ]
     )

@@ -34,12 +34,12 @@ def test_model():
 async def test_choose_paths():
     content = resource("buried_list_of_lat_lons.json")
     schema = extract_json_schema(json.loads(content))
-    paths = await select_properties(schema)
+    paths = await select_properties("Extract point data", schema)
 
     assert paths == PropertyPaths(
         latitude=["points", "latitude"],
         longitude=["points", "longitude"],
-        style_by=None,
+        color_by=None,
     )
 
 
@@ -49,7 +49,7 @@ def test_extract_path_values():
     paths = PropertyPaths(
         latitude=["points", "latitude"],
         longitude=["points", "longitude"],
-        style_by=None,
+        color_by=None,
     )
 
     lats = list(read_path(data, paths.latitude))
@@ -70,14 +70,14 @@ def test_read_complicated_path_one():
     paths = PropertyPaths(
         latitude=["items", "indexTerms", "geopoint", "lat"],
         longitude=["items", "indexTerms", "geopoint", "lon"],
-        style_by=None,
+        color_by=None,
     )
 
     lats = list(read_path(data, paths.latitude))
     lons = list(read_path(data, paths.longitude))
 
     assert lats == [40.09325, 0.9166666667]
-    assert lons == [0.9166666667, 19.1]
+    assert lons == [-122.22687, 19.1]
 
 
 def test_read_complicated_path_with_string_values():
@@ -101,7 +101,7 @@ def test_read_complicated_path_with_string_values():
     paths = PropertyPaths(
         latitude=["items", "data", "dwc:decimalLatitude"],
         longitude=["items", "data", "dwc:decimalLongitude"],
-        style_by=None,
+        color_by=None,
     )
 
     lats = list(read_path(data, paths.latitude))
@@ -127,7 +127,7 @@ def test_missing_properties():
     paths = PropertyPaths(
         latitude=["items", "data", "dwc:decimalLatitude"],
         longitude=["items", "data", "dwc:decimalLongitude"],
-        style_by=None,
+        color_by=None,
     )
 
     lats = list(read_path(data, paths.latitude))
@@ -138,26 +138,29 @@ def test_missing_properties():
 
 
 def test_render_points_as_geojson():
-    geo = render_points_as_geojson(list(zip([53.1, 3.3, 59.5], [10.7, 5.5, 70.0])))
+    geo = render_points_as_geojson(
+        coordinates=list(zip([53.1, 3.3, 59.5], [10.7, 5.5, 70.0])),
+        values=[0.1, 0.2, 0.3],
+    )
 
     assert geo == {
         "features": [
             {
                 "geometry": {"coordinates": [10.7, 53.1], "type": "Point"},
                 "id": 0,
-                "properties": {},
+                "properties": {"value": 0.1},
                 "type": "Feature",
             },
             {
                 "geometry": {"coordinates": [5.5, 3.3], "type": "Point"},
                 "id": 1,
-                "properties": {},
+                "properties": {"value": 0.2},
                 "type": "Feature",
             },
             {
                 "geometry": {"coordinates": [70.0, 59.5], "type": "Point"},
                 "id": 2,
-                "properties": {},
+                "properties": {"value": 0.3},
                 "type": "Feature",
             },
         ],

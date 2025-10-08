@@ -3,15 +3,18 @@
   "points": [
     {
       "latitude": 53.1,
-      "longitude": 10.7
+      "longitude": 10.7,
+      "size": 1
     },
     {
       "latitude": 3.3,
-      "longitude": 5.5
+      "longitude": 5.5,
+      "size": 2
     },
     {
       "latitude": 59.5,
-      "longitude": 70.0
+      "longitude": 70.0,
+      "size": 3
     }
   ]
 }
