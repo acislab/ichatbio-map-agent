@@ -105,18 +105,21 @@ async def select_properties(schema: dict):
 
 
 def read_path(content: JSON, path: list[str]) -> Iterator[float]:
-    layer = content[path[0]]
+    layer = content.get(path[0])
     match layer:
         case list() as records:
             for record in records:
                 yield from read_path(record, path[1:])
         case dict() as record:
-            yield from read_path(layer, path[1:])
-        case _ as property if len(path) == 1:
-            try:
-                yield float(property)
-            except ValueError:
+            yield from read_path(record, path[1:])
+        case _ as scalar if len(path) == 1:
+            if scalar is None:
                 yield None
+            else:
+                try:
+                    yield float(scalar)
+                except ValueError:
+                    yield None
 
 
 def render_points_as_geojson(
@@ -129,6 +132,7 @@ def render_points_as_geojson(
         [
             geojson.Feature(id=i, geometry=geojson.Point((lat, lon)), properties=props)
             for i, ((lat, lon), props) in enumerate(zip(coordinates, properties))
+            if lat is not None and lon is not None
         ]
     )
 

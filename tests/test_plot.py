@@ -59,7 +59,7 @@ def test_extract_path_values():
     assert lons == [10.7, 5.5, 70.0]
 
 
-def test_read_complicated_path():
+def test_read_complicated_path_one():
     data = {
         "items": [
             {"indexTerms": {"geopoint": {"lat": 40.09325, "lon": -122.22687}}},
@@ -77,6 +77,64 @@ def test_read_complicated_path():
     lons = list(read_path(data, paths.longitude))
 
     assert lats == [40.09325, 0.9166666667]
+    assert lons == [0.9166666667, 19.1]
+
+
+def test_read_complicated_path_with_string_values():
+    data = {
+        "items": [
+            {
+                "data": {
+                    "dwc:decimalLatitude": "23.075",
+                    "dwc:decimalLongitude": "-99.225",
+                }
+            },
+            {
+                "data": {
+                    "dwc:decimalLatitude": "23.1083333",
+                    "dwc:decimalLongitude": "-99.2416667",
+                }
+            },
+        ]
+    }
+
+    paths = PropertyPaths(
+        latitude=["items", "data", "dwc:decimalLatitude"],
+        longitude=["items", "data", "dwc:decimalLongitude"],
+        style_by=None,
+    )
+
+    lats = list(read_path(data, paths.latitude))
+    lons = list(read_path(data, paths.longitude))
+
+    assert lats == [23.075, 23.1083333]
+    assert lons == [-99.225, -99.2416667]
+
+
+def test_missing_properties():
+    data = {
+        "items": [
+            {
+                "data": {
+                    "dwc:decimalLatitude": "23.075",
+                    "dwc:decimalLongitude": "-99.225",
+                }
+            },
+            {"data": {}},
+        ]
+    }
+
+    paths = PropertyPaths(
+        latitude=["items", "data", "dwc:decimalLatitude"],
+        longitude=["items", "data", "dwc:decimalLongitude"],
+        style_by=None,
+    )
+
+    lats = list(read_path(data, paths.latitude))
+    lons = list(read_path(data, paths.longitude))
+
+    assert lats == [23.075, None]
+    assert lons == [-99.225, None]
 
 
 def test_render_points_as_geojson():
