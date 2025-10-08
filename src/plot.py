@@ -1,5 +1,6 @@
 from typing import Optional, Self, Iterator
 
+import geojson
 import pydantic
 from instructor import from_openai, retry, AsyncInstructor
 from openai import AsyncOpenAI
@@ -117,3 +118,19 @@ def read_path(content: JSON, path: list[str]) -> Iterator[float]:
                 yield float(property)
             except ValueError:
                 yield None
+
+
+def render_points_as_geojson(
+    coordinates: list[(float, float)], properties: list[dict] = None
+) -> geojson.FeatureCollection:
+    if properties is None:
+        properties = ({} for _ in coordinates)
+
+    geo = geojson.FeatureCollection(
+        [
+            geojson.Feature(id=i, geometry=geojson.Point((lat, lon)), properties=props)
+            for i, ((lat, lon), props) in enumerate(zip(coordinates, properties))
+        ]
+    )
+
+    return geo

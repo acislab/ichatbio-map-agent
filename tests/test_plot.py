@@ -4,7 +4,7 @@ import pydantic
 import pytest
 
 from conftest import resource
-from plot import make_validated_response_model, PropertyPaths
+from plot import make_validated_response_model, PropertyPaths, render_points_as_geojson
 from plot import read_path, select_properties
 from util import extract_json_schema
 
@@ -43,8 +43,7 @@ async def test_choose_paths():
     )
 
 
-@pytest.mark.asyncio
-async def test_extract_path_values():
+def test_extract_path_values():
     data = json.loads(resource("buried_list_of_lat_lons.json"))
 
     paths = PropertyPaths(
@@ -58,3 +57,31 @@ async def test_extract_path_values():
 
     assert lats == [53.1, 3.3, 59.5]
     assert lons == [10.7, 5.5, 70.0]
+
+
+def test_render_points_as_geojson():
+    geo = render_points_as_geojson(list(zip([53.1, 3.3, 59.5], [10.7, 5.5, 70.0])))
+
+    assert geo == {
+        "features": [
+            {
+                "geometry": {"coordinates": [53.1, 10.7], "type": "Point"},
+                "id": 0,
+                "properties": {},
+                "type": "Feature",
+            },
+            {
+                "geometry": {"coordinates": [3.3, 5.5], "type": "Point"},
+                "id": 1,
+                "properties": {},
+                "type": "Feature",
+            },
+            {
+                "geometry": {"coordinates": [59.5, 70.0], "type": "Point"},
+                "id": 2,
+                "properties": {},
+                "type": "Feature",
+            },
+        ],
+        "type": "FeatureCollection",
+    }
