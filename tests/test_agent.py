@@ -2,13 +2,13 @@ import pytest
 from ichatbio.agent_response import DirectResponse, ProcessBeginResponse, ProcessLogResponse, ArtifactResponse, \
     ResponseMessage
 
-from src.agent import HelloWorldAgent
+from src.agent import MapAgent
 
 
 @pytest.mark.asyncio
 async def test_hello_world(context, messages):
     # The test `context` populates the `messages` list with the agent's responses
-    await HelloWorldAgent().run(context, "Hi", "hello", None)
+    await MapAgent().run(context, "Hi", "hello", None)
 
     # Message objects are restricted to the following types:
     messages: list[ResponseMessage]
